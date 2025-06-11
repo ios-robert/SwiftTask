@@ -1,2 +1,3 @@
 github "duemunk/Async"
 github "mrackwitz/xcconfigs"
+github "Alamofire/Alamofire" == 4.9.1

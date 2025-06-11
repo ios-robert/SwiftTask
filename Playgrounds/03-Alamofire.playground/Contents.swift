@@ -1,7 +1,7 @@
 //: Playground - noun: a place where people can play
 
-import Cocoa
-import XCPlayground
+import Foundation
+import PlaygroundSupport
 
 //
 // NOTE: custom framework needs to be built first (and restart Xcode if needed)
@@ -20,43 +20,64 @@ typealias AlamofireTask = Task<Progress, Value, Error>
 
 let myError = NSError(domain: "MyErrorDomain", code: 0, userInfo: nil)
 
-// for async test
-XCPSetExecutionShouldContinueIndefinitely()
+// for async test - Updated for modern PlaygroundSupport
+PlaygroundPage.current.needsIndefiniteExecution = true
 
 //--------------------------------------------------
-// Example 1: Alamofire progress
+// Example 1: Alamofire progress (Updated for Alamofire 5.x)
 //--------------------------------------------------
 
 // define task
 let task = AlamofireTask { progress, fulfill, reject, configure in
     
-    let request = Alamofire.download(.GET, URLString: "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+    // Updated for Alamofire 5.x API
+    let destination: DownloadRequest.Destination = { _, _ in
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = documentsURL.appendingPathComponent("stream.txt")
+        return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
+    }
+    
+    let request = AF.download("https://httpbin.org/stream/100", to: destination)
         
     request
-        .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in
-            progress((bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) as Progress)
+        .downloadProgress { downloadProgress in
+            let progressTuple = (
+                bytesWritten: downloadProgress.completedUnitCount,
+                totalBytesWritten: downloadProgress.completedUnitCount,
+                totalBytesExpectedToWrite: downloadProgress.totalUnitCount
+            )
+            progress(progressTuple as Progress)
         }
-        .response { (request, response, data, error) in
+        .response { response in
             
             // print
-            data
-            error?.localizedDescription
+            print("Response: \(response)")
             
-            if let error = error {
-                reject(error)
+            if let error = response.error {
+                print("Error: \(error.localizedDescription)")
+                reject(error as NSError)
                 return
             }
             
             fulfill("OK")
-            
         }
+    
+    // Configure pause/resume/cancel for the request
+    configure.pause = {
+        request.suspend()
+    }
+    configure.resume = {
+        request.resume()
+    }
+    configure.cancel = {
+        request.cancel()
+    }
 }
 
 task
     .progress { oldProgress, newProgress in
-        // print
-        newProgress.bytesWritten
-        newProgress.totalBytesWritten
+        // print progress
+        print("Progress: \(newProgress.totalBytesWritten)/\(newProgress.totalBytesExpectedToWrite)")
     }
     .then { value, errorInfo -> String in
         if let errorInfo = errorInfo {
@@ -64,4 +85,12 @@ task
         }
         
         return "\(value!) World"
+    }
+    .success { result in
+        print("Final result: \(result)")
+        PlaygroundPage.current.finishExecution()
+    }
+    .failure { error, isCancelled in
+        print("Task failed: \(error?.localizedDescription ?? "Unknown error"), cancelled: \(isCancelled)")
+        PlaygroundPage.current.finishExecution()
     }

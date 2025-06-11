@@ -26,7 +26,7 @@ XCPSetExecutionShouldContinueIndefinitely()
 func asyncTask(value: String) -> MyTask
 {
     return MyTask { progress, fulfill, reject, configure in
-        DispatchQueue.main.after(when: .now() + 0.001) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
             fulfill(value)
         }
     }
@@ -36,7 +36,7 @@ func asyncTask(value: String) -> MyTask
 // Example 1: Async
 //--------------------------------------------------
 
-let task1a = asyncTask("Hello")
+let task1a = asyncTask(value: "Hello")
 let task1b = task1a
     .success { value -> String in
         return "\(value) World"
@@ -52,10 +52,10 @@ task1b.errorInfo
 // Example 2: Async chaining
 //--------------------------------------------------
 
-let task2a = asyncTask("Hello")
+let task2a = asyncTask(value: "Hello")
 let task2b = task2a
     .success { value -> MyTask in
-        return asyncTask("\(value) Cruel")  // next async
+        return asyncTask(value: "\(value) Cruel")  // next async
     }
     .success { value -> String in
         return "\(value) World"

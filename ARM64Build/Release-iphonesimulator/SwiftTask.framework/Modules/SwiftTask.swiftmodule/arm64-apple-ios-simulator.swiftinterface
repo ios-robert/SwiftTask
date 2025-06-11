@@ -1,0 +1,137 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.1.2 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
+// swift-module-flags: -target arm64-apple-ios12.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 6 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -module-name SwiftTask
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
+import Darwin
+import Foundation
+import ObjectiveC
+import Swift
+@_exported import SwiftTask
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+public enum TaskState : Swift.String, Swift.CustomStringConvertible {
+  case Paused
+  case Running
+  case Fulfilled
+  case Rejected
+  case Cancelled
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers public class TaskConfiguration {
+  public var pause: (() -> Swift.Void)?
+  public var resume: (() -> Swift.Void)?
+  public var cancel: (() -> Swift.Void)?
+  public var isFinished: Swift.Bool {
+    get
+  }
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers open class Task<Progress, Value, Error> : SwiftTask.Cancellable, Swift.CustomStringConvertible {
+  public typealias ProgressTuple = (oldProgress: Progress?, newProgress: Progress)
+  public typealias ErrorInfo = (error: Error?, isCancelled: Swift.Bool)
+  public typealias ProgressHandler = (Progress) -> Swift.Void
+  public typealias FulfillHandler = (Value) -> Swift.Void
+  public typealias RejectHandler = (Error) -> Swift.Void
+  public typealias Configuration = SwiftTask.TaskConfiguration
+  public typealias PromiseInitClosure = (_ fulfill: @escaping SwiftTask.Task<Progress, Value, Error>.FulfillHandler, _ reject: @escaping SwiftTask.Task<Progress, Value, Error>.RejectHandler) -> Swift.Void
+  public typealias InitClosure = (_ progress: @escaping SwiftTask.Task<Progress, Value, Error>.ProgressHandler, _ fulfill: @escaping SwiftTask.Task<Progress, Value, Error>.FulfillHandler, _ reject: @escaping SwiftTask.Task<Progress, Value, Error>.RejectHandler, _ configure: SwiftTask.TaskConfiguration) -> Swift.Void
+  public var state: SwiftTask.TaskState {
+    get
+  }
+  public var progress: Progress? {
+    get
+  }
+  public var value: Value? {
+    get
+  }
+  public var errorInfo: SwiftTask.Task<Progress, Value, Error>.ErrorInfo? {
+    get
+  }
+  public var name: Swift.String
+  open var description: Swift.String {
+    get
+  }
+  public init(weakified: Swift.Bool, paused: Swift.Bool, initClosure: @escaping SwiftTask.Task<Progress, Value, Error>.InitClosure)
+  convenience public init(paused: Swift.Bool, initClosure: @escaping SwiftTask.Task<Progress, Value, Error>.InitClosure)
+  convenience public init(initClosure: @escaping SwiftTask.Task<Progress, Value, Error>.InitClosure)
+  convenience public init(value: Value)
+  convenience public init(error: Error)
+  convenience public init(promiseInitClosure: @escaping SwiftTask.Task<Progress, Value, Error>.PromiseInitClosure)
+  @objc deinit
+  public func name(_ name: Swift.String) -> Self
+  public func clone() -> SwiftTask.Task<Progress, Value, Error>
+  public func retry(_ maxRetryCount: Swift.Int, condition: @escaping (SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> Swift.Bool = { _ in true }) -> SwiftTask.Task<Progress, Value, Error>
+  @discardableResult
+  public func progress(_ progressClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ProgressTuple) -> Swift.Void) -> Self
+  @discardableResult
+  public func progress<C>(_ canceller: inout C?, _ progressClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ProgressTuple) -> Swift.Void) -> Self where C : SwiftTask.Canceller
+  @discardableResult
+  public func then<Value2>(_ thenClosure: @escaping (Value?, SwiftTask.Task<Progress, Value, Error>.ErrorInfo?) -> Value2) -> SwiftTask.Task<Progress, Value2, Error>
+  @discardableResult
+  public func then<Value2, C>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, SwiftTask.Task<Progress, Value, Error>.ErrorInfo?) -> Value2) -> SwiftTask.Task<Progress, Value2, Error> where C : SwiftTask.Canceller
+  @discardableResult
+  public func then<Progress2, Value2, Error2>(_ thenClosure: @escaping (Value?, SwiftTask.Task<Progress, Value, Error>.ErrorInfo?) -> SwiftTask.Task<Progress2, Value2, Error2>) -> SwiftTask.Task<Progress2, Value2, Error2>
+  @discardableResult
+  public func then<Progress2, Value2, Error2, C>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, SwiftTask.Task<Progress, Value, Error>.ErrorInfo?) -> SwiftTask.Task<Progress2, Value2, Error2>) -> SwiftTask.Task<Progress2, Value2, Error2> where C : SwiftTask.Canceller
+  @discardableResult
+  public func success<Value2>(_ successClosure: @escaping (Value) -> Value2) -> SwiftTask.Task<Progress, Value2, Error>
+  @discardableResult
+  public func success<Value2, C>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> Value2) -> SwiftTask.Task<Progress, Value2, Error> where C : SwiftTask.Canceller
+  @discardableResult
+  public func success<Progress2, Value2, Error2>(_ successClosure: @escaping (Value) -> SwiftTask.Task<Progress2, Value2, Error2>) -> SwiftTask.Task<Progress2, Value2, Error>
+  @discardableResult
+  public func success<Progress2, Value2, Error2, C>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> SwiftTask.Task<Progress2, Value2, Error2>) -> SwiftTask.Task<Progress2, Value2, Error> where C : SwiftTask.Canceller
+  @discardableResult
+  public func failure(_ failureClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> Value) -> SwiftTask.Task<Progress, Value, Error>
+  @discardableResult
+  public func failure<C>(_ canceller: inout C?, _ failureClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> Value) -> SwiftTask.Task<Progress, Value, Error> where C : SwiftTask.Canceller
+  @discardableResult
+  public func failure<Progress2, Error2>(_ failureClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> SwiftTask.Task<Progress2, Value, Error2>) -> SwiftTask.Task<Progress2, Value, Error2>
+  @discardableResult
+  public func failure<Progress2, Error2, C>(_ canceller: inout C?, _ failureClosure: @escaping (SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> SwiftTask.Task<Progress2, Value, Error2>) -> SwiftTask.Task<Progress2, Value, Error2> where C : SwiftTask.Canceller
+  @discardableResult
+  public func on(success: ((Value) -> Swift.Void)? = nil, failure: ((SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> Swift.Void)? = nil) -> Self
+  public func on<C>(_ canceller: inout C?, success: ((Value) -> Swift.Void)? = nil, failure: ((SwiftTask.Task<Progress, Value, Error>.ErrorInfo) -> Swift.Void)? = nil) -> Self where C : SwiftTask.Canceller
+  @discardableResult
+  public func pause() -> Swift.Bool
+  @discardableResult
+  public func resume() -> Swift.Bool
+  @discardableResult
+  public func cancel(error: Error? = nil) -> Swift.Bool
+  public typealias _Error = Error?
+}
+extension SwiftTask.Task {
+  public typealias BulkProgress = (completedCount: Swift.Int, totalCount: Swift.Int)
+  public class func all(_ tasks: [SwiftTask.Task<Progress, Value, Error>]) -> SwiftTask.Task<SwiftTask.Task<Progress, Value, Error>.BulkProgress, [Value], Error>
+  public class func any(_ tasks: [SwiftTask.Task<Progress, Value, Error>]) -> SwiftTask.Task<Progress, Value, Error>
+  public class func some(_ tasks: [SwiftTask.Task<Progress, Value, Error>]) -> SwiftTask.Task<SwiftTask.Task<Progress, Value, Error>.BulkProgress, [Value], Error>
+  public class func cancelAll(_ tasks: [SwiftTask.Task<Progress, Value, Error>])
+  public class func pauseAll(_ tasks: [SwiftTask.Task<Progress, Value, Error>])
+  public class func resumeAll(_ tasks: [SwiftTask.Task<Progress, Value, Error>])
+}
+public protocol Cancellable {
+  associatedtype _Error
+  func cancel(error: Self._Error) -> Swift.Bool
+}
+public class Canceller : SwiftTask.Cancellable {
+  required public init(cancelHandler: @escaping () -> Swift.Void)
+  @discardableResult
+  public func cancel(error: Swift.Void = ()) -> Swift.Bool
+  public typealias _Error = Swift.Void
+  @objc deinit
+}
+@_inheritsConvenienceInitializers public class AutoCanceller : SwiftTask.Canceller {
+  @objc deinit
+  required public init(cancelHandler: @escaping () -> Swift.Void)
+}
+extension SwiftTask.TaskState : Swift.Equatable {}
+extension SwiftTask.TaskState : Swift.Hashable {}
+extension SwiftTask.TaskState : Swift.RawRepresentable {}
